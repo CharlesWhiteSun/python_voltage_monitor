@@ -1,11 +1,14 @@
 from typing import Tuple
-from readers.interfaces import VoltageReader
+from src.readers.interfaces import VoltageReader
 
 
 class VoltageService:
-    """高階邏輯，透過依賴注入接收不同的 Reader"""
-    def __init__(self, reader: VoltageReader) -> None:
+    """
+    VoltageService 接受任何符合 VoltageReader 的實作。
+    """
+
+    def __init__(self, reader: VoltageReader):
         self.reader = reader
 
-    def get_voltage(self, a: float, b: float, c: float) -> Tuple[float, float, float]:
-        return self.reader.read_values(a, b, c)
+    def get_voltage(self, *values: float) -> Tuple[float, ...]:
+        return self.reader.read(*values)
