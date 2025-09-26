@@ -1,7 +1,7 @@
 from typing import Protocol, Tuple
 
 
-class VoltageReader(Protocol):
+class IReader(Protocol):
     """
     介面: 定義讀取多組 float 的方法
     """

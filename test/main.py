@@ -1,28 +1,22 @@
-from test.mock_reader import MockVoltageReader
-from src.services.voltage_service import VoltageService
+from test.test_reader import test_plc_voltage_reader
 
 
-def main():
-    mock_reader = MockVoltageReader()
-    voltage_service = VoltageService(mock_reader)
+TEST_SUITES = [
+    ("PLC Voltage Reader 測試", test_plc_voltage_reader),
+]
 
-    test_cases = [
-        (220.5, 221.0, 219.8),
-        (221.0, 208.7, 222.5, 247.6, 223.0, 224.1, 287.3, 225.3),
-        (220.1,),
-        (221.0, 222.5, 223.0, 224.1, 225.3),
-        (),
-        (219.9, 220.0),
-    ]
 
-    for i, values in enumerate(test_cases, start=1):
-        print(f"\n[Test Case {i}] 輸入數值: {values}")
+def run_all_tests():
+    for idx, (title, test_func) in enumerate(TEST_SUITES, start=1):
+        print("=" * 60)
+        print(f"[{idx}] 執行: {title}")
+        print("=" * 60)
         try:
-            result = voltage_service.get_voltage(*values)
-            print(f"[Test Case {i}] 模擬輸出: {result}")
+            test_func()
         except Exception as e:
-            print(f"[Test Case {i}] 發生錯誤: {e}")
+            print(f"[{idx}] 測試 {title} 發生錯誤: {e}")
+        print("\n")
 
 
 if __name__ == "__main__":
-    main()
+    run_all_tests()
