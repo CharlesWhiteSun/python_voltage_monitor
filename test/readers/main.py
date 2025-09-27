@@ -1,4 +1,4 @@
-from test.readers.test_reader import *
+from test.readers.test_reader import test_plc_voltage_reader_negative, test_plc_voltage_reader_positive
 
 
 TEST_SUITES = [

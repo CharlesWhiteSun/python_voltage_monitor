@@ -1,8 +1,9 @@
-from test.utils.test_validate_float import *
+from test.utils.test_validate_type import *
+
 
 TEST_SUITES = [
-    ("utils validate_float 正向測試", test_validate_float_positive),
-    ("utils validate_float 負向測試", test_validate_float_negative),
+    ("utils validate_float 正向測試", test_validate_type_positive),
+    ("utils validate_float 負向測試", test_validate_type_negative),
 ]
 
 

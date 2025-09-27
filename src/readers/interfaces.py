@@ -1,4 +1,4 @@
-from typing import Protocol, Tuple, Any
+from typing import Optional, Protocol, Iterable, Type, Tuple, Any
 
 
 class IValidator(Protocol):
@@ -8,13 +8,13 @@ class IValidator(Protocol):
 
 
 class ITypeCheckValidator(IValidator, Protocol):
-    """介面: 繼承 IValidator，並加入型別檢查的設定"""
-    allow: bool
+    """介面: 型別檢查的設定"""
+    allow_types: Optional[Iterable[Type[Any]]]
 
 
 class IReader(Protocol):
-    """介面: 定義讀取多組 float 的方法"""
-    def read(self, *values: float) -> Tuple[float, ...]:
+    """介面: 定義讀取多組任意型別的方法"""
+    def read(self, *values: Any) -> Tuple[Any, ...]:
         ...
 
 
