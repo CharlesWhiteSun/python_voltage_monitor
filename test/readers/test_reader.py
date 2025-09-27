@@ -53,7 +53,7 @@ def test_plc_voltage_reader_positive():
 
             print(f"[{suite_name}][Test Case {idx}] 輸入數值: {values}, expect_pass={expect_pass}")
             try:
-                voltages = service.collect(*values)
+                voltages = service.collect(values)
                 print(f"[{suite_name}][Test Case {idx}] ✅ 電壓讀取結果: {voltages}")
                 if not expect_pass:
                     pytest.fail(f"[{suite_name}][Test Case {idx}] 本應失敗，卻通過了")
@@ -64,21 +64,23 @@ def test_plc_voltage_reader_positive():
 
 
 def test_plc_voltage_reader_negative():
-    test_suites = [
+    # 定義測試組 (名稱, 允許型別)
+    test_suites: Iterable[Tuple[str, Tuple[Type[Any], ...]]] = [
         ("只允許 float", (float,)),
         ("允許 float, int", (float, int)),
     ]
 
+    # 定義測資
     test_cases = [
-        ("string", False),
-        (123, False),
-        ([221.0, "222.5", 223.0], False),
-        ((219.9, 220.0, "error"), False),
-        ({"voltage": 220.5, "status": "OK"}, False),
-        ([None], False),
-        ({"a": None}, False),
-        ([True, 2.0], False),
-        ((object(),), False),
+        ("string", True),
+        (123, True),
+        ([221.0, "222.5", 223.0], True),
+        ((219.9, 220.0, "error"), True),
+        ({"voltage": 220.5, "status": "OK"}, True),
+        ([None], True),
+        ({"a": None}, True),
+        ([True, 2.0], True),
+        ((object(),), True),
     ]
 
     print("=" * 60)
@@ -93,13 +95,29 @@ def test_plc_voltage_reader_negative():
 
         for idx, (values, expect_fail) in enumerate(test_cases, start=1):
             print(f"[{suite_name}][Test Case {idx}] 輸入數值: {values}, expect_fail={expect_fail}")
+
+            # 判斷輸入是否應該失敗
+            def is_invalid(value: Any) -> bool:
+                if isinstance(value, allow_types):
+                    return False
+                if isinstance(value, (list, tuple, set)):
+                    return any(is_invalid(v) for v in value)
+                if isinstance(value, dict):
+                    return any(is_invalid(v) for v in value.values())
+                return True
+
+            expect_fail_dynamic = is_invalid(values if isinstance(values, tuple) else (values,))
+
             try:
-                voltages = service.collect(*values, allow=False)
+                voltages = service.collect(values)
             except Exception as e:
                 print(f"[{suite_name}][Test Case {idx}] ✅ 正確觸發錯誤: {e}")
+                if not expect_fail_dynamic:
+                    pytest.fail(f"[{suite_name}][Test Case {idx}] 本應通過，卻失敗了: {e}")
             else:
-                if expect_fail:
+                if expect_fail_dynamic:
                     print(f"[{suite_name}][Test Case {idx}] ❌ 沒有觸發錯誤，結果: {voltages}")
-                    pytest.fail("Negative test failed: 沒有觸發錯誤")
+                    pytest.fail(f"[{suite_name}][Test Case {idx}] 本應失敗，卻通過了")
                 else:
                     print(f"[{suite_name}][Test Case {idx}] ✅ 測試通過")
+

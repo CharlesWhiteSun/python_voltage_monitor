@@ -6,7 +6,7 @@ def _flatten_args(args: Iterable[Any]):
     for arg in args:
         if isinstance(arg, dict):
             yield from arg.values()
-        elif isinstance(arg, (list, tuple, set)):
+        elif isinstance(arg, (list, tuple, set)) and not isinstance(arg, str):
             yield from arg
         else:
             yield arg
