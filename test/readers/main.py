@@ -1,8 +1,9 @@
-from test.test_reader import test_plc_voltage_reader
+from test.readers.test_reader import *
 
 
 TEST_SUITES = [
-    ("PLC Voltage Reader 測試", test_plc_voltage_reader),
+    ("PLC Voltage Reader 正向測試", test_plc_voltage_reader_positive),
+    ("PLC Voltage Reader 負向測試", test_plc_voltage_reader_negative),
 ]
 
 
@@ -14,7 +15,7 @@ def run_all_tests():
         try:
             test_func()
         except Exception as e:
-            print(f"[{idx}] 測試 {title} 發生錯誤: {e}")
+            print(f"[{idx}][X] 測試 {title} 發生錯誤: {e}")
         print("\n")
 
 
