@@ -1,6 +1,6 @@
 import pytest
 from typing import Tuple, Iterable, Type, Any
-from src.utils.impl.validators import validate_type
+from src.utils.validators import validate_type
 
 
 # 測試組 (名稱, 允許型別)

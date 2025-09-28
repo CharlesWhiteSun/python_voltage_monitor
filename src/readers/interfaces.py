@@ -20,3 +20,9 @@ class IReader(Protocol):
 
 class IValidatingReader(IReader, ITypeCheckValidator, Protocol):
     """合併介面"""
+
+
+class ICurrentProcessingStrategy(Protocol):
+    """介面: 定義電流處理策略"""
+    def process(self, currents: Tuple[float, ...]) -> Tuple[float, ...]:
+        ...
