@@ -19,6 +19,18 @@ class CurrentSmoothChangeStrategy:
         direction: Direction = Direction.UP,
         start_delay_sec: float = 1.0,
     ):
+        """
+        平滑變動策略
+        - 產生一個平滑的波動序列，然後依序輸出。
+        - 支援啟動延遲，避免一開始就變動。
+        
+        :param step: 每次變動的步長
+        :param jitter: 每次變動的隨機抖動範圍
+        :param count: 每個波動週期的步數
+        :param round_digits: 四捨五入的小數位數
+        :param direction: 變動方向（UP 或 DOWN）
+        :param start_delay_sec: 啟動後延遲多長時間開始變動（秒）
+        """
         self.step = step
         self.jitter = jitter
         self.count = count

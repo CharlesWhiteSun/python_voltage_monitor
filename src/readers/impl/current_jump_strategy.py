@@ -12,7 +12,7 @@ class CurrentJumpStrategy:
             round_digits: Optional[int] = None,
         ):
         """
-        非同步計時
+        隨機跳動策略
          - 使用 time.time() 檢查距離上次變動的時間是否超過 interval_sec。
          - 如果時間到才變動，否則直接返回原值。
 
