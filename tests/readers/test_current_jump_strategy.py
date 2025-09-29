@@ -1,7 +1,7 @@
 import time
 import pytest
 from typing import Tuple
-from src.readers.impl.current_jump_strategy import CurrentJumpStrategy
+from python_voltage_monitor.readers.impl.current_jump_strategy import CurrentJumpStrategy
 
 
 @pytest.mark.slow

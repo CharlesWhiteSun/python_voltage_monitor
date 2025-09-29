@@ -1,5 +1,5 @@
 from typing import Optional, Tuple, Iterable, Type, Any
-from src.readers.interfaces import IValidatingReader
+from python_voltage_monitor.readers.interfaces import IValidatingReader
 
 
 class VoltageReaderService:

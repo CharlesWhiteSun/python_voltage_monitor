@@ -1,5 +1,5 @@
-from src.readers.interfaces import IValidatingReader, ICurrentProcessingStrategy
-from src.utils.validators import validate_type
+from python_voltage_monitor.readers.interfaces import IValidatingReader, ICurrentProcessingStrategy
+from python_voltage_monitor.utils.validators import validate_type
 from typing import Any, Iterable, Optional, Tuple, Type
 
 

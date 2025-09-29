@@ -1,7 +1,7 @@
 import time
 import pytest
 from typing import Tuple
-from src.readers.impl.current_smooth_change_strategy import (
+from python_voltage_monitor.readers.impl.current_smooth_change_strategy import (
     CurrentSmoothChangeStrategy,
     Direction
 )

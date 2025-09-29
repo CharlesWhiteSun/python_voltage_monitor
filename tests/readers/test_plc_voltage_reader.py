@@ -1,9 +1,9 @@
 import pytest
 import time
-from src.readers.impl.current_jump_strategy import CurrentJumpStrategy
-from src.readers.impl.current_smooth_change_strategy import CurrentSmoothChangeStrategy, Direction
-from src.readers.impl.plc_voltage_reader import PLCVoltageReader
-from src.services.voltage_service import VoltageReaderService
+from python_voltage_monitor.readers.impl.current_jump_strategy import CurrentJumpStrategy
+from python_voltage_monitor.readers.impl.current_smooth_change_strategy import CurrentSmoothChangeStrategy, Direction
+from python_voltage_monitor.readers.impl.plc_voltage_reader import PLCVoltageReader
+from python_voltage_monitor.services.voltage_service import VoltageReaderService
 from typing import Tuple, Iterable, Type, Any
 
 
