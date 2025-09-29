@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python_voltage_monitor"
+version = "1.1.5"
+description = "Python application for retrieving voltage data from PLC devices and uploading it to the cloud for real-time energy monitoring."
+readme = "README.md"
+authors = [
+    { name = "Charles", email = "charleswhitesun@gmail.com" }
+]
+license = { text = "Apache-2.0" }
+requires-python = ">=3.8"
+dependencies = [
+    "requests"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
