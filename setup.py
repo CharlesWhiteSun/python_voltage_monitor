@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="python_voltage_monitor",
-    version="1.1.3",
+    version="1.1.4",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     install_requires=[
