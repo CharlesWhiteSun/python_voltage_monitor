@@ -37,7 +37,7 @@ class CurrentJumpStrategy:
     def process(self, currents: Tuple[float, ...]) -> Tuple[float, ...]:
         now = time.time()
 
-        # 第一次處理或時間到
+        # 第一次處理或時間到 → 更新跳動值
         if self._last_change_time is None or (now - self._last_change_time) >= self.interval_sec:
             self._last_change_time = now
             self._last_jump_value = tuple(
@@ -46,5 +46,9 @@ class CurrentJumpStrategy:
             )
             return self._last_jump_value
 
-        # 時間未到，返回原值
+        # 時間未到 → 返回上一次跳動的值
+        if self._last_jump_value is not None:
+            return self._last_jump_value
+
+        # 預設 fallback
         return currents

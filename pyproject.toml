@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python_voltage_monitor"
-version = "1.1.5"
+version = "1.1.6"
 description = "Python application for retrieving voltage data from PLC devices and uploading it to the cloud for real-time energy monitoring."
 readme = "README.md"
 authors = [

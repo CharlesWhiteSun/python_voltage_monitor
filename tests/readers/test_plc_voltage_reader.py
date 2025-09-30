@@ -97,11 +97,12 @@ def test_current_jump_strategy_applies_jump(monkeypatch):
     result1 = service.collect(inputs)
     assert result1 == (221.0,)
 
-    # 馬上呼叫第二次 → 時間未到，應該回傳原始輸入
+    # 馬上呼叫第二次 → 時間未到，應該回傳上一次跳動的值
     result2 = service.collect(inputs)
-    assert result2 == inputs
+    assert result2 == result1
 
     # 等待超過 interval_sec
+    import time
     time.sleep(0.11)
 
     # 再次呼叫 → 會產生跳動
@@ -123,6 +124,73 @@ def test_current_jump_strategy_rounding(monkeypatch):
     result = service.collect(inputs)
     # 100.0 + 0.12345 ≈ 100.12 (四捨五入到小數第2位)
     assert result == (100.12,)
+
+
+def make_service(lower=-1.0, upper=1.0, interval=0.1, round_digits=None):
+    """建立帶有 CurrentJumpStrategy 的 service"""
+    strategy = CurrentJumpStrategy(lower_bound=lower, upper_bound=upper,
+                                   interval_sec=interval, round_digits=round_digits)
+    reader = PLCVoltageReader(allow_types=(float,), strategy=strategy)
+    return VoltageReaderService(reader)
+
+
+def test_output_length_matches_input_length_single_value(monkeypatch):
+    """輸入單一數值，輸出長度應一致"""
+    monkeypatch.setattr("random.uniform", lambda a, b: 0.5)
+
+    service = make_service()
+    inputs = (220.0,)
+    result = service.collect(inputs)
+
+    assert len(result) == len(inputs), "輸出長度應與輸入一致"
+
+
+def test_output_length_matches_input_length_multiple_values(monkeypatch):
+    """輸入多個數值，輸出長度應一致"""
+    monkeypatch.setattr("random.uniform", lambda a, b: 1.0)
+
+    service = make_service()
+    inputs = (220.0, 5.0, 110.0)
+    result = service.collect(inputs)
+
+    assert len(result) == len(inputs), "輸出長度應與輸入一致"
+
+
+def test_output_stable_when_interval_not_passed(monkeypatch):
+    """在 interval_sec 內呼叫多次 → 輸出長度仍一致"""
+    monkeypatch.setattr("random.uniform", lambda a, b: 1.0)
+
+    service = make_service(interval=0.5)
+    inputs = (220.0, 5.0)
+
+    result1 = service.collect(inputs)
+    result2 = service.collect(inputs)  # 馬上呼叫 → 應該維持上一次的值
+
+    assert len(result1) == len(inputs)
+    assert len(result2) == len(inputs)
+    assert result1 == result2, "時間未到應該回傳同樣的結果"
+
+
+def test_output_changes_after_interval(monkeypatch):
+    """超過 interval_sec → 應該產生新的跳動值（但長度仍一致）"""
+    calls = {"count": 0}
+
+    def fake_uniform(a, b):
+        calls["count"] += 1
+        return float(calls["count"])  # 每次遞增
+
+    monkeypatch.setattr("random.uniform", fake_uniform)
+
+    service = make_service(interval=0.1)
+    inputs = (220.0, 5.0)
+
+    result1 = service.collect(inputs)
+    time.sleep(0.11)  # 等超過 interval
+    result2 = service.collect(inputs)
+
+    assert len(result1) == len(inputs)
+    assert len(result2) == len(inputs)
+    assert result1 != result2, "超過 interval 應產生新的值"
 
 
 def test_strategy_respects_start_delay():
