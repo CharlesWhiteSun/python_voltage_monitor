@@ -21,8 +21,9 @@ class CurrentSmoothChangeStrategy:
     ):
         """
         平滑變動策略
-        - 產生一個平滑的波動序列，然後依序輸出。
-        - 支援啟動延遲，避免一開始就變動。
+        - 輸入多少個參數，就對每個參數套用一樣的波動邏輯
+        - 每個輸出值會依據 base_value + 波動量計算
+        - 確保輸入與輸出參數數量一致
         
         :param step: 每次變動的步長
         :param jitter: 每次變動的隨機抖動範圍
@@ -41,30 +42,37 @@ class CurrentSmoothChangeStrategy:
         self._start_time = time.time()
         self._active = False
         self._wave_index = 0
-        self._base_value = None
-        self._wave_values = []
+        self._base_values: Tuple[float, ...] = ()
+        self._wave_values: Tuple[Tuple[float, ...], ...] = ()
 
-    def _generate_wave(self, base_value: float):
-        wave = []
+    def _generate_wave(self, base_values: Tuple[float, ...]) -> Tuple[Tuple[float, ...], ...]:
+        """
+        為每個 base_value 生成一組平滑波動，最後組合成多維輸出
+        """
+        waves = []
 
-        if self.direction == Direction.UP:
-            # 遞增到頂點再遞減
-            for i in range(self.count):
-                delta = self.step * i + random.uniform(-self.jitter, self.jitter)
-                wave.append(round(base_value + delta, self.round_digits))
-            for i in range(self.count - 2, -1, -1):
-                delta = self.step * i + random.uniform(-self.jitter, self.jitter)
-                wave.append(round(base_value + delta, self.round_digits))
-        else:
-            # 遞減到底再遞增
-            for i in range(self.count):
-                delta = self.step * i + random.uniform(-self.jitter, self.jitter)
-                wave.append(round(base_value - delta, self.round_digits))
-            for i in range(self.count - 2, -1, -1):
-                delta = self.step * i + random.uniform(-self.jitter, self.jitter)
-                wave.append(round(base_value - delta, self.round_digits))
+        for base in base_values:
+            wave = []
+            if self.direction == Direction.UP:
+                # 遞增到頂點再遞減
+                for i in range(self.count):
+                    delta = self.step * i + random.uniform(-self.jitter, self.jitter)
+                    wave.append(round(base + delta, self.round_digits))
+                for i in range(self.count - 2, -1, -1):
+                    delta = self.step * i + random.uniform(-self.jitter, self.jitter)
+                    wave.append(round(base + delta, self.round_digits))
+            else:
+                # 遞減到底再遞增
+                for i in range(self.count):
+                    delta = self.step * i + random.uniform(-self.jitter, self.jitter)
+                    wave.append(round(base - delta, self.round_digits))
+                for i in range(self.count - 2, -1, -1):
+                    delta = self.step * i + random.uniform(-self.jitter, self.jitter)
+                    wave.append(round(base - delta, self.round_digits))
+            waves.append(wave)
 
-        return wave
+        # zip 每個 step 的多個 wave，形成多維輸出
+        return tuple(zip(*waves))
 
     def process(self, currents: Tuple[float, ...]) -> Tuple[float, ...]:
         now = time.time()
@@ -73,7 +81,7 @@ class CurrentSmoothChangeStrategy:
             if now - self._start_time >= self.start_delay_sec:
                 self._active = True
                 self._wave_index = 0
-                self._base_value = currents[0] if currents else 0.0
+                self._base_value = currents
                 self._wave_values = self._generate_wave(self._base_value)
             else:
                 return currents
@@ -81,7 +89,7 @@ class CurrentSmoothChangeStrategy:
         if not self._wave_values:
             return currents
 
-        output_value = self._wave_values[self._wave_index]
+        output_values = self._wave_values[self._wave_index]
         self._wave_index += 1
 
         if self._wave_index >= len(self._wave_values):
@@ -89,4 +97,4 @@ class CurrentSmoothChangeStrategy:
             self._active = False
             self._start_time = now
 
-        return tuple([output_value])
+        return tuple(output_values)

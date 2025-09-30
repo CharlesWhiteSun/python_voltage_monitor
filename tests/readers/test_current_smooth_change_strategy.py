@@ -18,13 +18,12 @@ def test_wave_generation(direction):
         start_delay_sec=0.0
     )
 
-    base_value = 10.0
-    inputs: Tuple[float, ...] = (base_value,)
+    base_values: Tuple[float, ...] = (10.0, 10.0)  # <-- 傳入 tuple，而不是單一 float
     outputs = []
 
     # 產生一個完整的波形週期
     for _ in range((strategy.count * 2) - 1):
-        out = strategy.process(inputs)
+        out = strategy.process(base_values)
         outputs.append(out[0])
 
     # 波形長度應該等於 count*2 - 1
@@ -77,8 +76,15 @@ def test_round_digits_and_jitter():
         start_delay_sec=0.0
     )
 
-    inputs = (10.0,)
-    values = [strategy.process(inputs)[0] for _ in range((strategy.count * 2) - 1)]
+    inputs = (10.0,)  # 明確給 tuple
+    values = []
+
+    # 產生一個完整波形
+    for _ in range((strategy.count * 2) - 1):
+        out = strategy.process(inputs)
+        # 確認回傳 tuple 長度與輸入相同
+        assert len(out) == len(inputs)
+        values.append(out[0])
 
     # 檢查數值小數位數
     for val in values:
@@ -86,8 +92,8 @@ def test_round_digits_and_jitter():
         assert len(decimal_part) <= 1
 
     # 檢查 jitter 是否影響波形（數值會有微小變化）
-    diffs = [abs(values[i+1] - values[i]) for i in range(len(values)-1)]
-    assert any(diff != 2.0 for diff in diffs)  # jitter導致的差異
+    diffs = [abs(values[i + 1] - values[i]) for i in range(len(values) - 1)]
+    assert any(diff != 1.0 for diff in diffs)  # jitter 導致的差異
 
 
 def test_wave_cycle_repeat():
@@ -101,7 +107,11 @@ def test_wave_cycle_repeat():
     )
 
     inputs = (10.0,)
+
     first_cycle = [strategy.process(inputs)[0] for _ in range((strategy.count * 2) - 1)]
     second_cycle = [strategy.process(inputs)[0] for _ in range((strategy.count * 2) - 1)]
 
-    assert first_cycle == second_cycle  # jitter=0 無隨機波動，週期應相同
+    # jitter=0，生成的波形應該完全相同
+    assert first_cycle == second_cycle
+    # 波形長度要正確
+    assert len(first_cycle) == (strategy.count * 2) - 1

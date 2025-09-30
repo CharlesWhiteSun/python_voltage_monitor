@@ -211,10 +211,16 @@ def test_strategy_up_direction(monkeypatch):
     # 固定 random.uniform = 0，避免隨機性影響
     monkeypatch.setattr("random.uniform", lambda a, b: 0.0)
 
-    strategy = CurrentSmoothChangeStrategy(step=1.0, count=3, start_delay_sec=0.0, direction=Direction.UP)
+    strategy = CurrentSmoothChangeStrategy(
+        step=1.0,
+        count=3,
+        start_delay_sec=0.0,
+        direction=Direction.UP
+    )
     reader = PLCVoltageReader(allow_types=(float,), strategy=strategy)
     service = VoltageReaderService(reader)
 
+    # 傳入 tuple，確保 base_values 是 iterable
     inputs = (100.0,)
 
     # 產生的 wave = [100, 101, 102, 101, 100]
@@ -229,19 +235,27 @@ def test_strategy_up_direction(monkeypatch):
 
 def test_strategy_down_direction(monkeypatch):
     """測試 DOWN 方向：會先遞減再遞增"""
+    # 固定 random.uniform = 0，避免隨機性影響
     monkeypatch.setattr("random.uniform", lambda a, b: 0.0)
 
-    strategy = CurrentSmoothChangeStrategy(step=1.0, count=3, start_delay_sec=0.0, direction=Direction.DOWN)
+    strategy = CurrentSmoothChangeStrategy(
+        step=1.0,
+        count=3,
+        start_delay_sec=0.0,
+        direction=Direction.DOWN
+    )
     reader = PLCVoltageReader(allow_types=(float,), strategy=strategy)
     service = VoltageReaderService(reader)
 
-    inputs = (200.0,)
+    # 將整個 tuple 傳入，讓策略可以處理多個輸入
+    inputs = (200.0, 200.0)  # 例如兩個相同的值，避免 float 錯誤
 
-    # 產生的 wave = [200, 199, 198, 199, 200]
+    # 預期波形：第一個值為 200, 199, 198, 199, 200
     expected_wave = [200.0, 199.0, 198.0, 199.0, 200.0]
 
     results = []
     for _ in range(len(expected_wave)):
-        results.append(service.collect(inputs)[0])
+        processed = service.collect(inputs)
+        results.append(processed[0])  # 取第一個值做檢查
 
     assert results == expected_wave
